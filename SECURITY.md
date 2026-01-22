@@ -19,12 +19,12 @@ We take security seriously. If you discover a security vulnerability, please:
 
 We're actively working on fixing these security vulnerabilities:
 
-| Issue | Status | Priority |
-|-------|---------|----------|
-| No authentication on MCP server | 🔧 In Progress | CRITICAL |
-| Path traversal in file operations | 📋 Planned | CRITICAL |
-| Missing input validation | 📋 Planned | HIGH |
-| Insecure session management | 📋 Planned | HIGH |
+| Issue                             | Status         | Priority |
+| --------------------------------- | -------------- | -------- |
+| No authentication on MCP server   | 🔧 In Progress | CRITICAL |
+| Path traversal in file operations | 📋 Planned     | CRITICAL |
+| Missing input validation          | 📋 Planned     | HIGH     |
+| Insecure session management       | 📋 Planned     | HIGH     |
 
 See our [security issues](https://github.com/aaronsb/obsidian-mcp-plugin/issues?q=is%3Aissue+is%3Aopen+label%3Asecurity) for details.
 
@@ -43,9 +43,9 @@ Until security improvements are complete:
 ```json
 {
   "httpEnabled": true,
-  "httpPort": 3001,  // Change from default
+  "httpPort": 3111, // Change from default
   "autoDetectPortConflicts": true,
-  "debugLogging": false  // Disable in production
+  "debugLogging": false // Disable in production
 }
 ```
 

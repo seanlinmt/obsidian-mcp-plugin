@@ -11,7 +11,7 @@ interface MCPPluginSettings {
 
 const DEFAULT_SETTINGS: MCPPluginSettings = {
 	httpEnabled: false, // Start disabled to avoid server startup issues
-	httpPort: 3001,
+	httpPort: 3111,
 	httpsPort: 3002,
 	enableSSL: false,
 	debugLogging: false
@@ -97,9 +97,9 @@ class MCPSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Server port')
-			.setDesc('Port for the server (default: 3001)')
+			.setDesc('Port for the server (default: 3111)')
 			.addText(text => text
-				.setPlaceholder('3001')
+				.setPlaceholder('3111')
 				.setValue(this.plugin.settings.httpPort.toString())
 				.onChange(async (value) => {
 					const port = parseInt(value);

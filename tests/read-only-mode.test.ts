@@ -76,7 +76,7 @@ describe('Read-Only Mode Integration', () => {
   test('plugin settings structure includes readOnlyMode', () => {
     const settings = {
       httpEnabled: true,
-      httpPort: 3001,
+      httpPort: 3111,
       debugLogging: false,
       showConnectionStatus: true,
       autoDetectPortConflicts: true,

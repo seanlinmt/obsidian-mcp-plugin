@@ -24,9 +24,9 @@ describe('MCPHttpServer', () => {
   });
 
   test('should create server instance', () => {
-    const server = new MCPHttpServer(mockApp, 3001);
+    const server = new MCPHttpServer(mockApp, 3111);
     expect(server).toBeInstanceOf(MCPHttpServer);
-    expect(server.getPort()).toBe(3001);
+    expect(server.getPort()).toBe(3111);
     expect(server.isServerRunning()).toBe(false);
   });
 
