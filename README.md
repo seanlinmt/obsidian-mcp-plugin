@@ -1,10 +1,6 @@
-# Obsidian MCP Plugin
+# Obsidian MCP Plugin (enhanced privacy version)
 
-![GitHub stars](https://img.shields.io/github/stars/aaronsb/obsidian-mcp-plugin?style=social)
-![GitHub forks](https://img.shields.io/github/forks/aaronsb/obsidian-mcp-plugin?style=social)
-![Downloads](https://img.shields.io/github/downloads/aaronsb/obsidian-mcp-plugin/total?color=blue)
-![Latest Release](https://img.shields.io/github/v/release/aaronsb/obsidian-mcp-plugin?include_prereleases&label=version)
-![License](https://img.shields.io/github/license/aaronsb/obsidian-mcp-plugin)
+Forked from [https://github.com/aaronsb/obsidian-mcp-plugin](https://github.com/aaronsb/obsidian-mcp-plugin)
 
 **Give AI semantic agency over your knowledge graph**
 
