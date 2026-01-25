@@ -22,7 +22,7 @@ export class NodeMCPServer {
   private server: any;
   private isRunning: boolean = false;
 
-  constructor(app: App, port: number = 3111) {
+  constructor(app: App, port: number = 3001) {
     this.app = app;
     this.port = port;
   }

@@ -11,7 +11,7 @@ If you're using the HTTP endpoint, your configuration should look like this:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:3111/mcp"
+        "http://localhost:3001/mcp"
       ]
     }
   }
@@ -60,7 +60,7 @@ If you have API key authentication enabled, use this format:
 ```
 
 Could you please:
-1. Confirm which URL you're using (HTTP on port 3111 or HTTPS on port 3443)?
+1. Confirm which URL you're using (HTTP on port 3001 or HTTPS on port 3443)?
 2. Try the appropriate configuration above?
 3. Restart Claude Desktop after updating the configuration
 

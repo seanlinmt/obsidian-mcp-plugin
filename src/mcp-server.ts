@@ -45,7 +45,7 @@ export class MCPHttpServer {
   private certificateManager: CertificateManager | null;
   private isHttps: boolean = false;
 
-  constructor(obsidianApp: App, port: number = 3111, plugin?: any) {
+  constructor(obsidianApp: App, port: number = 3001, plugin?: any) {
     this.obsidianApp = obsidianApp;
     this.port = port;
     this.plugin = plugin;

@@ -127,4 +127,3 @@ test-concurrent-sessions.js
 
 # Claude configuration directory
 .claude/
-.DS_Store

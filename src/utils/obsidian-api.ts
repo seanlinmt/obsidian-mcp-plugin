@@ -58,7 +58,7 @@ export class ObsidianAPI {
         ...baseInfo,
         mcp: {
           running: this.plugin.mcpServer.isServerRunning(),
-          port: this.plugin.settings?.httpPort || 3111,
+          port: this.plugin.settings?.httpPort || 3001,
           connections: this.plugin.mcpServer.getConnectionCount() || 0,
           vault: this.app.vault.getName()
         }

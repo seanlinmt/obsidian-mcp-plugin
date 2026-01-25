@@ -50,7 +50,7 @@ interface MCPServerInfo {
 
 const DEFAULT_SETTINGS: MCPPluginSettings = {
 	httpEnabled: true, // Start enabled by default
-	httpPort: 3111,
+	httpPort: 3001,
 	httpsEnabled: false, // HTTPS disabled by default
 	httpsPort: 3443,
 	certificateConfig: {
@@ -642,12 +642,12 @@ class MCPSettingTab extends PluginSettingTab {
 
 		const portSetting = new Setting(containerEl)
 			.setName('Server port')
-			.setDesc('Port for the server (default: 3111)')
+			.setDesc('Port for the server (default: 3001)')
 			.addText(text => {
 				let pendingPort = this.plugin.settings.httpPort;
 				let hasChanges = false;
 				
-				text.setPlaceholder('3111')
+				text.setPlaceholder('3001')
 					.setValue(this.plugin.settings.httpPort.toString())
 					.onChange((value) => {
 						const port = parseInt(value);
@@ -688,7 +688,7 @@ class MCPSettingTab extends PluginSettingTab {
 							
 							// Hide apply button
 							button.buttonEl.classList.add('mcp-hidden');
-							portSetting.setDesc('Port for HTTP mcp server (default: 3111)');
+							portSetting.setDesc('Port for HTTP mcp server (default: 3001)');
 						}
 					});
 				
@@ -1548,16 +1548,16 @@ class MCPSettingTab extends PluginSettingTab {
 		
 		switch (status) {
 			case 'available':
-				setting.setDesc("Port for HTTP mcp server (default: 3111) ✅ available");
+				setting.setDesc("Port for HTTP mcp server (default: 3001) ✅ available");
 				break;
 			case 'this-server':
-				setting.setDesc("Port for HTTP mcp server (default: 3111) 🟢 this server");
+				setting.setDesc("Port for HTTP mcp server (default: 3001) 🟢 this server");
 				break;
 			case 'in-use':
-				setting.setDesc(`Port for HTTP MCP server (default: 3111) ⚠️ Port ${port} in use`);
+				setting.setDesc(`Port for HTTP MCP server (default: 3001) ⚠️ Port ${port} in use`);
 				break;
 			default:
-				setting.setDesc('Port for HTTP mcp server (default: 3111)');
+				setting.setDesc('Port for HTTP mcp server (default: 3001)');
 		}
 	}
 	
@@ -1592,10 +1592,10 @@ class MCPSettingTab extends PluginSettingTab {
 		if (button) {
 			if (hasChanges) {
 				button.buttonEl.classList.remove('mcp-hidden');
-				setting.setDesc(`Port for HTTP MCP server (default: 3111) - Click Apply to change to ${pendingPort}`);
+				setting.setDesc(`Port for HTTP MCP server (default: 3001) - Click Apply to change to ${pendingPort}`);
 			} else {
 				button.buttonEl.classList.add('mcp-hidden');
-				setting.setDesc('Port for HTTP mcp server (default: 3111)');
+				setting.setDesc('Port for HTTP mcp server (default: 3001)');
 			}
 		}
 	}
