@@ -261,8 +261,7 @@ const pluginMock = {
         dir: __dirname
     }
 };
-
-const server = new MCPHttpServer(app as any, PORT, pluginMock);
+const server = new MCPHttpServer(app as any, PORT, pluginMock as any);
 
 server.start().catch(err => {
     console.error('Failed to start server:', err);
