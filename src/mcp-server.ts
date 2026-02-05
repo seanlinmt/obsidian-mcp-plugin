@@ -110,7 +110,6 @@ interface ConnectionPoolStatsResponse {
 export class MCPHttpServer {
   private app: express.Application;
   private server?: Server | HttpsServer;
-  // eslint-disable-next-line @typescript-eslint/no-deprecated -- Server (not McpServer) is required because this code uses setRequestHandler with JSON Schema, not Zod schemas
   private mcpServer?: MCPServer; // Single server for non-concurrent mode
   private mcpServerPool?: MCPServerPool; // Server pool for concurrent mode
   private transports: Map<string, StreamableHTTPServerTransport> = new Map();
@@ -258,8 +257,7 @@ export class MCPHttpServer {
       Debug.log(`🏊 Connection pool initialized with max ${maxConnections} connections`);
     } else {
       // Initialize single MCP Server for non-concurrent mode
-      // eslint-disable-next-line @typescript-eslint/no-deprecated -- Server (not McpServer) is required because this code uses setRequestHandler with JSON Schema, not Zod schemas
-      this.mcpServer = new MCPServer(
+          this.mcpServer = new MCPServer(
         {
           name: 'Semantic Notes Vault MCP',
           version: getVersion()
@@ -590,8 +588,7 @@ export class MCPHttpServer {
       if (sessionId) {
         effectiveSessionId = sessionId;
       }
-      // eslint-disable-next-line @typescript-eslint/no-deprecated -- Server (not McpServer) is required because this code uses setRequestHandler with JSON Schema, not Zod schemas
-      let mcpServer: MCPServer;
+          let mcpServer: MCPServer;
 
       // Helper: create a null response shim so we can send an internal initialize
       const createNullRes = (): NullResponse => {
