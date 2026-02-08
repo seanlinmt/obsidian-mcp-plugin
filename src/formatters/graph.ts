@@ -32,24 +32,29 @@ export interface GraphTraverseResponse {
 export function formatGraphTraverse(response: GraphTraverseResponse): string {
   const lines: string[] = [];
 
-  const fileName = response.sourcePath.split('/').pop() || response.sourcePath;
+  const sourcePath = response.sourcePath || 'Unknown';
+  const fileName = sourcePath.split('/').pop() || sourcePath;
   lines.push(header(1, `Graph: ${fileName}`));
   lines.push('');
-  lines.push(property('Source', response.sourcePath, 0));
-  lines.push(property('Max Depth', response.maxDepth.toString(), 0));
-  lines.push(property('Nodes Found', response.totalNodes.toString(), 0));
+  lines.push(property('Source', sourcePath, 0));
+
+  const maxDepth = response.maxDepth ?? 0;
+  lines.push(property('Max Depth', maxDepth.toString(), 0));
+
+  const totalNodes = response.totalNodes ?? (response.nodes?.length || 0);
+  lines.push(property('Nodes Found', totalNodes.toString(), 0));
   lines.push('');
 
   // Group by depth
   const byDepth = new Map<number, GraphNode[]>();
-  response.nodes.forEach(node => {
+  (response.nodes || []).forEach(node => {
     const nodes = byDepth.get(node.depth) || [];
     nodes.push(node);
     byDepth.set(node.depth, nodes);
   });
 
   // Display hierarchy
-  for (let depth = 0; depth <= response.maxDepth; depth++) {
+  for (let depth = 0; depth <= maxDepth; depth++) {
     const nodesAtDepth = byDepth.get(depth) || [];
     if (nodesAtDepth.length === 0) continue;
 
