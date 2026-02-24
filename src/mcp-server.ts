@@ -847,7 +847,8 @@ export class MCPHttpServer {
         Debug.error('Failed to configure server timeouts:', e);
       }
 
-      this.server.listen(this.port, 'localhost', () => {
+      const bindHost = this.plugin?.settings?.bindHost || 'localhost';
+      this.server.listen(this.port, bindHost, () => {
         this.isRunning = true;
         Debug.log(`🚀 MCP server started on ${protocol}://localhost:${this.port}`);
         Debug.log(`📍 Health check: ${protocol}://localhost:${this.port}/`);

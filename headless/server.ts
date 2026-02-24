@@ -206,12 +206,14 @@ const app = new HeadlessApp(VAULT_PATH);
 const pluginMock = {
     settings: {
         httpPort: PORT,
+        bindHost: '0.0.0.0', // Listen on all interfaces for Docker networking
         apiKey: process.env.MCP_API_KEY || '', // Optional API key
         readOnlyMode: process.env.READ_ONLY === 'true'
     },
     ignoreManager: {
         isExcluded: () => false,
-        filterPaths: (paths: string[]) => paths
+        filterPaths: (paths: string[]) => paths,
+        getEnabled: () => false
     },
     manifest: {
         dir: __dirname
