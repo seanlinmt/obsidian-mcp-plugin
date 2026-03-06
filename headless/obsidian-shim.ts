@@ -14,53 +14,53 @@ export class App {
 
 export class Vault {
     adapter: any = { basePath: '/vault' };
-    
+
     getName() { return "HeadlessVault"; }
-    
+
     getAbstractFileByPath(path: string): TAbstractFile | null {
         // This will be overridden or implemented in the actual MockVault
-        return null; 
+        return null;
     }
-    
+
     getRoot() { return new TFolder("/", "/"); }
-    
+
     read(file: TFile): Promise<string> { return Promise.resolve(""); }
-    
+
     modify(file: TFile, data: string): Promise<void> { return Promise.resolve(); }
-    
+
     create(path: string, data: string): Promise<TFile> { return Promise.resolve(new TFile("new", path)); }
-    
+
     createFolder(path: string): Promise<void> { return Promise.resolve(); }
-    
+
     trash(file: TAbstractFile, system: boolean): Promise<void> { return Promise.resolve(); }
-    
+
     getAllLoadedFiles(): TAbstractFile[] { return []; }
-    
+
     getMarkdownFiles(): TFile[] { return []; }
-    
-    on() {} // Event emitter stub
-    off() {}
+
+    on() { } // Event emitter stub
+    off() { }
 }
 
 export class Workspace {
     activeLeaf: any = null;
-    
+
     getActiveFile(): TFile | null { return null; }
-    
-    getLeaf(create?: boolean) { 
-        return { 
-            openFile: (file: any) => Promise.resolve() 
-        }; 
+
+    getLeaf(create?: boolean) {
+        return {
+            openFile: (file: any) => Promise.resolve()
+        };
     }
-    
-    on() {}
-    off() {}
+
+    on() { }
+    off() { }
 }
 
 export class MetadataCache {
     getFileCache(file: TFile): any { return null; }
-    on() {}
-    off() {}
+    on() { }
+    off() { }
 }
 
 export class FileManager {
@@ -70,7 +70,7 @@ export class FileManager {
 
 export class TAbstractFile {
     parent: TFolder | null = null;
-    constructor(public name: string, public path: string) {}
+    constructor(public name: string, public path: string) { }
 }
 
 export class TFile extends TAbstractFile {
@@ -104,9 +104,9 @@ export class Plugin {
     }
     loadData() { return Promise.resolve({}); }
     saveData(data: any) { return Promise.resolve(); }
-    addSettingTab(tab: any) {}
-    registerView(type: string, viewCreator: any) {}
-    addCommand(command: any) {}
+    addSettingTab(tab: any) { }
+    registerView(type: string, viewCreator: any) { }
+    addCommand(command: any) { }
 }
 
 export class PluginSettingTab {
@@ -116,8 +116,8 @@ export class PluginSettingTab {
         this.app = app;
         this.plugin = plugin;
     }
-    display() {}
-    hide() {}
+    display() { }
+    hide() { }
 }
 
 export function getAllTags(cache: any): string[] {
@@ -125,3 +125,12 @@ export function getAllTags(cache: any): string[] {
 }
 
 export type Command = any;
+
+export function normalizePath(path: string): string {
+    if (!path) return '';
+    path = path.replace(/\\/g, '/');
+    while (path.startsWith('/')) path = path.substring(1);
+    while (path.endsWith('/')) path = path.substring(0, path.length - 1);
+    path = path.replace(/\/{2,}/g, '/');
+    return path;
+}
