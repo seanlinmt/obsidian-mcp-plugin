@@ -71,7 +71,40 @@ class HeadlessVault extends Vault {
         const name = path.basename(filePath);
         
         if (stats.isDirectory()) {
-            return new TFolder(name, filePath);
+            const folder = new TFolder(name, filePath);
+            
+            // Populate immediate children for folder listing
+            // Symlinks are naturally supported via fs.readdirSync and fs.statSync
+            try {
+                const files = fs.readdirSync(fullPath);
+                for (const file of files) {
+                    if (file !== '.git' && file !== 'node_modules') {
+                        const childPath = filePath === '/' ? file : `${filePath}/${file}`;
+                        const childFullPath = path.join(this.basePath, childPath);
+                        
+                        if (fs.existsSync(childFullPath)) {
+                            const childStats = fs.statSync(childFullPath);
+                            let childFile: TAbstractFile;
+                            if (childStats.isDirectory()) {
+                                childFile = new TFolder(file, childPath);
+                            } else {
+                                const tFile = new TFile(file, childPath);
+                                tFile.stat = {
+                                    size: childStats.size,
+                                    mtime: childStats.mtimeMs,
+                                    ctime: childStats.ctimeMs
+                                };
+                                childFile = tFile;
+                            }
+                            childFile.parent = folder;
+                            folder.children.push(childFile);
+                        }
+                    }
+                }
+            } catch (e) {
+                // Ignore errors reading children
+            }
+            return folder;
         } else {
             const file = new TFile(name, filePath);
             file.stat = {

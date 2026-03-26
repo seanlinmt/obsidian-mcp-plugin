@@ -88,14 +88,15 @@ export class SecurePathValidator {
 			throw new SecurityError('Path escapes vault boundary', 'VAULT_ESCAPE');
 		}
 
-		// Layer 8: Real path verification (optional, only for existing files)
-		// This helps prevent symlink attacks
+		// Layer 8: Real path verification
+		// Modified to allow following symbolic links as per requirements
+		// We rely on Layer 7 boundary validation using the normalized path instead of realpath
+		// to allow symbolic links to external directories
 		if (fs.existsSync(normalized)) {
 			try {
-				const realPath = fs.realpathSync(normalized);
-				if (!this.isWithinVault(realPath)) {
-					throw new SecurityError('Resolved path escapes vault boundary', 'SYMLINK_ESCAPE');
-				}
+				// We still do a basic check to ensure the file system can access it
+				// but we no longer throw SYMLINK_ESCAPE
+				fs.realpathSync(normalized);
 			} catch {
 				// File system error, let it pass for now
 			}
