@@ -68,9 +68,20 @@ export class SecurePathValidator {
 			throw new SecurityError('Path contains forbidden sequences', 'FORBIDDEN_PATTERN');
 		}
 
-		// Layer 3: Path type validation - Reject absolute paths
+		// Layer 3: Path type validation - Handle absolute paths safely for LLMs
 		if (this.isAbsolutePath(userPath)) {
-			throw new SecurityError('Absolute paths are not allowed', 'ABSOLUTE_PATH');
+			// Auto-correct absolute paths that start with the vault base directory
+			// Many external systems mistakenly provide the absolute container path (e.g. /vault/tickets)
+			const vaultPrefix = path.normalize(this.baseDir);
+			const vaultPrefixWithSep = vaultPrefix.endsWith(path.sep) ? vaultPrefix : vaultPrefix + path.sep;
+			const normalizedUserPath = path.normalize(userPath);
+			
+			if (normalizedUserPath === vaultPrefix || normalizedUserPath.startsWith(vaultPrefixWithSep)) {
+				userPath = path.relative(vaultPrefix, normalizedUserPath);
+				if (userPath === '') userPath = '/';
+			} else {
+				throw new SecurityError('Absolute paths are not allowed', 'ABSOLUTE_PATH');
+			}
 		}
 
 		// Layer 4: Obsidian normalization - Use framework's built-in normalizer

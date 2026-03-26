@@ -28,16 +28,20 @@ function getAllFiles(dirPath: string, arrayOfFiles: string[] = [], rootPath: str
 
     files.forEach(function(file) {
         const fullPath = path.join(dirPath, file);
-        if (fs.statSync(fullPath).isDirectory()) {
-            if (file !== '.git' && file !== 'node_modules') {
-                arrayOfFiles = getAllFiles(fullPath, arrayOfFiles, rootPath);
+        try {
+            if (fs.statSync(fullPath).isDirectory()) {
+                if (file !== '.git' && file !== 'node_modules') {
+                    arrayOfFiles = getAllFiles(fullPath, arrayOfFiles, rootPath);
+                }
+            } else {
+                // Relativize path
+                let relativePath = path.relative(rootPath, fullPath);
+                // Ensure forward slashes
+                relativePath = relativePath.split(path.sep).join('/');
+                arrayOfFiles.push(relativePath);
             }
-        } else {
-            // Relativize path
-            let relativePath = path.relative(rootPath, fullPath);
-            // Ensure forward slashes
-            relativePath = relativePath.split(path.sep).join('/');
-            arrayOfFiles.push(relativePath);
+        } catch (e) {
+            // Ignore broken symlinks or permission errors during traversal
         }
     });
 
@@ -169,6 +173,11 @@ class HeadlessVault extends Vault {
     getAllLoadedFiles(): TAbstractFile[] {
         const filePaths = getAllFiles(this.basePath);
         return filePaths.map(p => this.getAbstractFileByPath(p)).filter((f): f is TAbstractFile => f !== null);
+    }
+    
+    getFiles(): TFile[] {
+        return this.getAllLoadedFiles()
+            .filter((f): f is TFile => f instanceof TFile);
     }
     
     getMarkdownFiles(): TFile[] {

@@ -274,7 +274,7 @@ function getParametersForOperation(operation: string): Record<string, unknown> {
   const pathParam = {
     path: {
       type: 'string',
-      description: 'File path relative to vault root'
+      description: 'File path strictly relative to the vault root (e.g., use "tickets" instead of "/vault/tickets"). Do not use absolute paths!'
     }
   };
   
@@ -291,7 +291,7 @@ function getParametersForOperation(operation: string): Record<string, unknown> {
       ...pathParam,
       directory: {
         type: 'string',
-        description: 'Directory path for list operations'
+        description: 'Directory path strictly relative to the vault root (e.g., use "tickets" instead of "/vault/tickets"). Do not use absolute paths!'
       },
       query: {
         type: 'string',
