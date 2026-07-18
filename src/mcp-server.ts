@@ -14,7 +14,6 @@ import {
   type CallToolResult
 } from '@modelcontextprotocol/sdk/types.js';
 import { randomUUID } from 'crypto';
-import * as path from 'path';
 import { getVersion } from './version';
 import { ObsidianAPI } from './utils/obsidian-api';
 import { SecureObsidianAPI, VaultSecurityManager } from './security';
@@ -25,6 +24,13 @@ import { ConnectionPool, PooledRequest } from './utils/connection-pool';
 import { SessionManager } from './utils/session-manager';
 import { MCPServerPool } from './utils/mcp-server-pool';
 import { CertificateManager, CertificateConfig } from './utils/certificate-manager';
+import {
+  classifyFromSettings,
+  agentInstructionsForVerdict,
+  resolveListenHost,
+  type BindMode,
+  type Verdict,
+} from './utils/network-classifier';
 
 /** Minimal plugin interface for MCPHttpServer.
  * Includes fields from SecurePluginRef and ObsidianAPIPluginRef so the same object
@@ -123,6 +129,8 @@ export class MCPHttpServer {
   private sessionManager?: SessionManager;
   private certificateManager: CertificateManager | null;
   private isHttps: boolean = false;
+  private resolvedListenHost: string = '127.0.0.1';
+  private currentVerdict: Verdict | null = null;
 
   constructor(obsidianApp: App, port: number = 3001, plugin?: MCPPluginRef) {
     this.obsidianApp = obsidianApp;
@@ -201,7 +209,6 @@ export class MCPHttpServer {
         requestTimeout: 30000,
         sessionTimeout: 3600000,
         sessionCheckInterval: 60000,
-        workerScript: path.join(plugin.manifest.dir ?? '', 'dist', 'workers', 'semantic-worker.js')
       });
       void this.connectionPool.initialize();
 
@@ -286,7 +293,7 @@ export class MCPHttpServer {
     const availableTools = createSemanticTools(this.obsidianAPI);
 
     // List tools handler
-    this.mcpServer.setRequestHandler(ListToolsRequestSchema, () => {
+      this.mcpServer.server.setRequestHandler(ListToolsRequestSchema, () => {
       Debug.log('📋 Listing available tools');
       return {
         tools: availableTools.map(tool => ({
@@ -298,7 +305,7 @@ export class MCPHttpServer {
     });
 
     // Call tool handler
-    this.mcpServer.setRequestHandler(CallToolRequestSchema, async (request): Promise<CallToolResult> => {
+    this.mcpServer.server.setRequestHandler(CallToolRequestSchema, async (request): Promise<CallToolResult> => {
       const { name, arguments: args } = request.params;
       Debug.log(`🔧 Executing tool: ${name}`, args);
 
@@ -349,13 +356,13 @@ export class MCPHttpServer {
     }
 
     // List resources handler
-    this.mcpServer.setRequestHandler(ListResourcesRequestSchema, () => {
+    this.mcpServer.server.setRequestHandler(ListResourcesRequestSchema, () => {
       Debug.log('📋 Listing available resources');
       return { resources };
     });
 
     // Read resource handler
-    this.mcpServer.setRequestHandler(ReadResourceRequestSchema, (request) => {
+    this.mcpServer.server.setRequestHandler(ReadResourceRequestSchema, (request) => {
       const { uri } = request.params;
       Debug.log(`📖 Reading resource: ${uri}`);
 
@@ -532,18 +539,10 @@ export class MCPHttpServer {
       });
     });
 
-    // GET endpoint for MCP info (for debugging)
+    // SSE notification stream and MCP protocol endpoint
     this.app.get('/mcp', (req: express.Request, res: express.Response) => {
-      res.json({
-        message: 'MCP endpoint active',
-        usage: 'POST /mcp with MCP protocol messages',
-        protocol: 'Model Context Protocol',
-        transport: 'HTTP',
-        sessionHeader: 'Mcp-Session-Id'
-      });
+      void this.handleMCPRequest(req, res);
     });
-
-    // MCP protocol endpoint - using StreamableHTTPServerTransport
     this.app.post('/mcp', (req: express.Request, res: express.Response) => {
       void this.handleMCPRequest(req, res);
     });
@@ -565,6 +564,28 @@ export class MCPHttpServer {
     });
   }
 
+  private sendSessionTerminated(
+    res: express.Response,
+    requestBody: JsonRpcRequest | undefined,
+    sessionId: string | undefined,
+  ): void {
+    const id = requestBody?.id ?? null;
+    if (sessionId) {
+      res.setHeader('Mcp-Session-Id', sessionId);
+      res.status(404).json({
+        jsonrpc: '2.0',
+        error: { code: -32001, message: 'Session terminated. Please initialize a new session.' },
+        id,
+      });
+    } else {
+      res.status(400).json({
+        jsonrpc: '2.0',
+        error: { code: -32001, message: 'Session required. Please initialize a new session.' },
+        id,
+      });
+    }
+  }
+
   private async handleMCPRequest(req: express.Request, res: express.Response): Promise<void> {
     try {
       const request = req.body as JsonRpcRequest | undefined;
@@ -583,12 +604,35 @@ export class MCPHttpServer {
         res.status(200).json({ jsonrpc: '2.0', id: request?.id ?? null, result: { ok: true, sessionId: sessionId || null } });
         return;
       }
+      // SSE notification stream: exempt from idle socket timeout (#221)
+      if (req.method === 'GET') {
+        const sock = (req as unknown as { socket?: { setTimeout?: (ms: number) => void } }).socket;
+        if (typeof sock?.setTimeout === 'function') {
+          sock.setTimeout(0);
+        }
+      }
+
+      // Session-terminated check (ADR-106 / #190 / #128): non-initialize
+      // requests with no valid session must return a spec-compliant error
+      // instead of auto-creating a transport.
+      const isInit = request?.method === 'initialize';
+      if (!isInit) {
+        if (sessionId && !this.transports.has(sessionId)) {
+          this.sendSessionTerminated(res, request, sessionId);
+          return;
+        }
+        if (!sessionId) {
+          this.sendSessionTerminated(res, request, undefined);
+          return;
+        }
+      }
+
       let transport: StreamableHTTPServerTransport | undefined;
-      let effectiveSessionId!: string; // will be set in the branches below
+      let effectiveSessionId!: string;
       if (sessionId) {
         effectiveSessionId = sessionId;
       }
-          let mcpServer: MCPServer;
+      let mcpServer: MCPServer;
 
       // Helper: create a null response shim so we can send an internal initialize
       const createNullRes = (): NullResponse => {
@@ -930,8 +974,36 @@ export class MCPHttpServer {
         Debug.error('Failed to configure server timeouts:', e);
       }
 
-      const bindHost = this.plugin?.settings?.bindHost || 'localhost';
-      this.server.listen(this.port, bindHost, () => {
+      // ADR-107: classify network exposure and resolve the listen host
+      const settings = this.plugin?.settings;
+      const bindMode: BindMode = (settings?.bindHost === '0.0.0.0' || settings?.bindHost === '::') ? 'all'
+        : (settings?.bindHost && settings.bindHost !== 'localhost' && settings.bindHost !== '127.0.0.1') ? 'custom'
+        : 'loopback';
+      const customBindHost = bindMode === 'custom' ? (settings?.bindHost ?? '') : '';
+      const userSuppliedCert = !!(settings?.certificateConfig?.enabled && settings?.certificateConfig?.certPath && settings?.certificateConfig?.keyPath);
+      this.currentVerdict = classifyFromSettings({
+        httpsEnabled: this.isHttps,
+        bindMode,
+        customBindHost,
+        userSuppliedCert,
+      });
+      const customHost = customBindHost;
+      this.resolvedListenHost = resolveListenHost(bindMode, customHost);
+
+      // Inject agent instructions for non-ok verdicts
+      const instructions = agentInstructionsForVerdict(this.currentVerdict, this.resolvedListenHost, this.port);
+      if (instructions && this.mcpServerPool) {
+        this.mcpServerPool.setInitializeInstructions(instructions);
+      }
+
+      // Fire a Notice + Debug.error on the jail verdict
+      const verdict = this.currentVerdict;
+      if (verdict.class === 'jail') {
+        Debug.error(verdict.reason);
+        new Notice(verdict.reason, 10000);
+      }
+
+      this.server.listen(this.port, this.resolvedListenHost, () => {
         this.isRunning = true;
         Debug.log(`🚀 MCP server started on ${protocol}://localhost:${this.port}`);
         Debug.log(`📍 Health check: ${protocol}://localhost:${this.port}/`);

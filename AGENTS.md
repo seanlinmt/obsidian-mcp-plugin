@@ -1,83 +1,63 @@
-# PROJECT KNOWLEDGE BASE
+# OBSIDIAN MCP PLUGIN — AGENTS.md
 
-**Generated:** 2026-03-26
-**Commit:** df68c1e
-**Branch:** main
+**Generated:** 2026-07-17
+**Source:** package.json (0.11.42)
 
 ## OVERVIEW
 
-Obsidian MCP Plugin — hybrid plugin combining local REST API + semantic MCP operations + direct Obsidian API integration for enhanced performance.
+Hybrid Obsidian plugin: local REST API + semantic MCP operations + direct Obsidian API integration. Dual mode: plugin (browser) + headless (Node.js via obsidian-shim).
 
 ## STRUCTURE
 
 ```
-./
-├── src/                    # Main source (65 .ts files)
-│   ├── main.ts            # PRIMARY: Obsidian plugin entry (default export)
-│   ├── mcp-server.ts       # HTTP/MCP server (MCPHttpServer class)
-│   ├── utils/             # 22 utilities (high complexity)
-│   ├── tools/             # 9 MCP tool implementations
-│   ├── formatters/        # 8 output formatters
-│   ├── security/          # 5 security modules
-│   ├── indexing/          # 4 semantic indexers
-│   ├── types/             # Type definitions
-│   ├── semantic/          # Semantic routing
-│   └── workers/           # Worker management
-├── headless/              # Standalone server (node-mcp)
-├── tests/                 # Integration tests (8 files)
-├── docs/                  # Documentation
-└── wiki/                  # (empty/minimal)
+src/
+├── main.ts              # Plugin entry, default export ObsidianMCPPlugin
+├── mcp-server.ts        # HTTP/MCP server (MCPHttpServer class)
+├── utils/               # 22 utilities, ObsidianAPI abstraction (CRITICAL)
+├── tools/               # 9 tools: semantic-tools.ts, graph-*.ts, etc.
+├── formatters/          # 8 formatters, ${tool}.${action} dispatch
+├── security/            # 5 modules, 8-layer path validation pipeline
+├── indexing/            # 4 semantic indexers, 3-strategy retriever
+├── types/               # Type definitions
+├── semantic/            # Semantic routing
+└── workers/             # Worker dispatch patterns
+tests/                   # Integration tests, *.test.ts, mocks in __mocks__/
+headless/                # Standalone Node.js server
 ```
-
-## WHERE TO LOOK
-
-| Task | Location | Notes |
-|------|----------|-------|
-| Plugin development | `src/main.ts` | Default export ObsidianMCPPlugin class |
-| MCP server | `src/mcp-server.ts` | MCPHttpServer handles HTTP transport |
-| Tool implementations | `src/tools/*.ts` | semantic-tools.ts, graph-*.ts |
-| Vault operations | `src/utils/obsidian-api.ts` | Abstraction layer (CRITICAL) |
-| Security | `src/security/` | Path validation, vault security |
-| Headless mode | `headless/server.ts` | Standalone server with shims |
-| Tests | `tests/` | Integration tests, use mocks |
-
-## CONVENTIONS (DEVIATIONS)
-
-- **Tests**: Mixed locations (`tests/` root + `src/utils/__tests__/`)
-- **Multiple entry points**: `main.ts`, `main-simple.ts`, `main-complex.ts` (only main.ts production)
-- **Version sync**: `sync-version.mjs` auto-syncs package.json → manifest.json + version.ts
-- **No 'v' prefix**: Tags like `0.11.7` not `v0.11.7`
-- **2 spaces**: TypeScript indentation
-
-## ANTI-PATTERNS (THIS PROJECT)
-
-- **DO NOT use** `dangerouslyDisableAuth` unless absolutely necessary
-- **DO NOT** use `with` statement (discouraged, though deemed safe here)
-- **DO NOT** forget to run `npm run build && npm run lint && npm test` pre-push
-- **WARNING**: Large files with `returnFullFile` consume significant context tokens
-
-## UNIQUE STYLES
-
-- **Dual mode**: Plugin (browser) + Headless (Node.js) with obsidian-shim
-- **SOLID focus**: ObsidianAPI interface MUST remain stable for extensions
-- **Performance docs**: JSDoc includes benchmarks (e.g., "~1-5ms vs ~50-100ms HTTP")
 
 ## COMMANDS
 
-```bash
-npm run dev           # Watch mode
-npm run build         # Production build (syncs version first)
-npm run test          # Jest tests
-npm run lint          # ESLint
-gh workflow run release.yml  # Create release
-```
+| Command | Action |
+|---------|--------|
+| `npm run dev` | Watch mode |
+| `npm run build` | Production build (syncs version first) |
+| `npm run test` | Jest tests |
+| `npm run lint` | ESLint |
 
-## GOTCHAS
+## CONVENTIONS
 
-- Version source is `package.json` ONLY — sync-version.mjs handles the rest
-- CLAUDE.md has detailed architecture patterns (ObsidianAPI abstraction, etc.)
-- Tests use `tests/__mocks__/obsidian.ts` for Obsidian API mocking
+- **Source of truth**: `package.json` for version — sync-version.mjs propagates to `manifest.json` + `version.ts`
+- **Tags**: no `v` prefix (e.g. `0.11.7` not `v0.11.7`)
+- **Indentation**: 2 spaces
+- **Dual mode**: Plugin (browser) + Headless (Node.js) with obsidian-shim
+- **SOLID**: ObsidianAPI interface must remain stable for extensions
+- **Tests**: `tests/` root + `src/utils/__tests__/`; mock Obsidian API via `tests/__mocks__/obsidian.ts`
 
----
+## KEY MODULES
 
-*Root knowledge base — see subdirs for domain-specific info*
+| Module | File | Purpose |
+|--------|------|---------|
+| Vault API | `src/utils/obsidian-api.ts` | Primary vault abstraction layer |
+| Search | `src/utils/search-facade.ts` | Routing across indexing strategies |
+| Security | `src/security/vault-security.ts` | `VaultSecurityManager.validateOperation()` — 8-layer path validation |
+| Formatters | `src/formatters/` | `normalizeResponse()` required, type-safe interfaces |
+| Tools | `src/tools/` | 7 base tools + Dataview; read-only mode checks; SSRF protection in fetch |
+| Indexing | `src/indexing/` | 3-strategy retriever (semantic, graph, keyword); synchronous search |
+
+## ANTI-PATTERNS
+
+- **DO NOT** use `dangerouslyDisableAuth` unless absolutely necessary
+- **DO NOT** use `with` statement
+- **DO NOT** forget `npm run build && npm run lint && npm test` before push
+- **DO NOT** use `returnFullFile` in large files (high token cost)
+- **DO NOT** add comments unless asked

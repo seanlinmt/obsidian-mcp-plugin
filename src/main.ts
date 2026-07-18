@@ -821,7 +821,7 @@ class MCPSettingTab extends PluginSettingTab {
 
 		if (this.plugin.settings.bindMode === 'all') {
 			const caution = containerEl.createDiv({ cls: 'mcp-network-caution' });
-			caution.createEl('strong', { text: '⚠ All interfaces selected. ' });
+			caution.createEl('strong', { text: '⚠ all interfaces selected. ' });
 			caution.createSpan({
 				text: this.plugin.settings.httpsEnabled
 					? 'Encrypted via HTTPS — clients must trust the certificate. Use a real (non-self-signed) cert for public networks.'
@@ -838,7 +838,7 @@ class MCPSettingTab extends PluginSettingTab {
 				.setName('Custom bind address')
 				.setDesc('IPv4/IPv6/hostname to bind to. Typing a loopback address auto-switches to loopback; typing a wildcard auto-switches to all interfaces.')
 				.addText(text => text
-					.setPlaceholder('e.g. 192.168.1.50')
+					.setPlaceholder('E.g. 192.168.1.50')
 					.setValue(this.plugin.settings.customBindHost)
 					.onChange((value) => {
 						this.plugin.settings.customBindHost = value;
@@ -995,7 +995,7 @@ class MCPSettingTab extends PluginSettingTab {
 				}
 			} else {
 				statusEl.createEl('p', {
-					text: '📝 No certificate found - will auto-generate on server start',
+					text: '📝 no certificate found - will auto-generate on server start',
 					cls: 'setting-item-description mcp-security-note'
 				});
 			}
@@ -1074,7 +1074,7 @@ class MCPSettingTab extends PluginSettingTab {
 					if (value) {
 						new Notice('⚠️ authentication disabled! Your vault is accessible without credentials.');
 					} else {
-						new Notice('✅ Authentication enabled. API key required for access.');
+						new Notice('✅ authentication enabled. API key required for access.');
 					}
 					
 					// Refresh display to update examples
@@ -1097,10 +1097,10 @@ class MCPSettingTab extends PluginSettingTab {
 					// Debug logging for read-only mode changes
 					if (value) {
 						Debug.log('🔒 READ-ONLY MODE ENABLED via settings - Server restart required for activation');
-						new Notice('🔒 Read-only mode enabled. All write operations are blocked.');
+						new Notice('🔒 read-only mode enabled. All write operations are blocked.');
 					} else {
 						Debug.log('✅ READ-ONLY MODE DISABLED via settings - Server restart required for deactivation');
-						new Notice('✅ Read-only mode disabled. All operations are allowed.');
+						new Notice('✅ read-only mode disabled. All operations are allowed.');
 					}
 					
 					// Refresh display to update examples
@@ -1122,10 +1122,10 @@ class MCPSettingTab extends PluginSettingTab {
 						if (value) {
 							await this.plugin.ignoreManager.loadIgnoreFile();
 							Debug.log('✅ Path exclusions enabled');
-							new Notice('✅ Path exclusions enabled');
+							new Notice('✅ path exclusions enabled');
 						} else {
 							Debug.log('🔓 Path exclusions disabled');
-							new Notice('🔓 Path exclusions disabled');
+							new Notice('🔓 path exclusions disabled');
 						}
 					}
 					
@@ -1146,9 +1146,9 @@ class MCPSettingTab extends PluginSettingTab {
 						
 						if (value) {
 							this.plugin.registerContextMenu();
-							new Notice('✅ Context menu enabled - restart required for full effect');
+							new Notice('✅ context menu enabled - restart required for full effect');
 						} else {
-							new Notice('🔓 Context menu disabled - restart required for full effect');
+							new Notice('🔓 context menu disabled - restart required for full effect');
 						}
 					}));
 		}
@@ -1227,7 +1227,7 @@ class MCPSettingTab extends PluginSettingTab {
 							new Notice('📝 .mcpignore file opened in default app');
 						} else {
 							Debug.log('Electron shell not available');
-							new Notice('❌ Unable to open in external app');
+							new Notice('❌ unable to open in external app');
 						}
 					} catch (err: unknown) {
 						const errMsg = err instanceof Error ? err.message : String(err);
@@ -1237,7 +1237,7 @@ class MCPSettingTab extends PluginSettingTab {
 				} catch (error) {
 					const message = error instanceof Error ? error.message : String(error);
 					Debug.log(`Failed to open .mcpignore file: ${message}`);
-					new Notice('❌ Failed to open .mcpignore file');
+					new Notice('❌ failed to open .mcpignore file');
 				}
 				})();
 			});
@@ -1271,7 +1271,7 @@ class MCPSettingTab extends PluginSettingTab {
 							new Notice('📁 .mcpignore file location shown in explorer');
 						} else {
 							Debug.log('Electron shell not available for show in folder');
-							new Notice('❌ System explorer not available');
+							new Notice('❌ system explorer not available');
 						}
 					} catch (err: unknown) {
 						const errMsg = err instanceof Error ? err.message : String(err);
@@ -1281,7 +1281,7 @@ class MCPSettingTab extends PluginSettingTab {
 				} catch (error) {
 					const message = error instanceof Error ? error.message : String(error);
 					Debug.log(`Failed to show .mcpignore file: ${message}`);
-					new Notice('❌ Failed to show file location');
+					new Notice('❌ failed to show file location');
 				}
 				})();
 			});
@@ -1303,11 +1303,11 @@ class MCPSettingTab extends PluginSettingTab {
 						await this.plugin.ignoreManager!.createDefaultIgnoreFile();
 						// Force reload to ensure fresh state
 						await this.plugin.ignoreManager!.forceReload();
-						new Notice('📄 Default .mcpignore template created');
+						new Notice('📄 default .mcpignore template created');
 						this.render(); // Refresh to update status
 					} catch (error) {
 						Debug.log('Failed to create .mcpignore template:', error);
-						new Notice('❌ Failed to create template');
+						new Notice('❌ failed to create template');
 					}
 				})();
 			});
@@ -1320,11 +1320,11 @@ class MCPSettingTab extends PluginSettingTab {
 				void (async () => {
 					try {
 						await this.plugin.ignoreManager!.forceReload();
-						new Notice('🔄 Exclusion patterns reloaded');
+						new Notice('🔄 exclusion patterns reloaded');
 						this.render(); // Refresh to update status
 					} catch (error) {
 						Debug.log('Failed to reload patterns:', error);
-						new Notice('❌ Failed to reload patterns');
+						new Notice('❌ failed to reload patterns');
 					}
 				})();
 			});
@@ -1552,7 +1552,7 @@ class MCPSettingTab extends PluginSettingTab {
 			});
 		} else {
 			info.createEl('p', {
-				text: '🔌 Plugin integrations: none detected (install dataview for additional functionality)',
+				text: '🔌 plugin integrations: none detected (install dataview for additional functionality)',
 				cls: 'plugin-integration-status'
 			});
 		}
@@ -1571,7 +1571,7 @@ class MCPSettingTab extends PluginSettingTab {
 		// === Claude Desktop (MCPB) — primary onboarding path ===
 		new Setting(info).setName("Claude desktop (.mcpb — one-click install)").setHeading();
 		info.createEl('p', {
-			text: 'Download the bundle, drop it onto Claude desktop, and paste these values in the install prompt.'
+			text: 'Download the bundle, drop it onto claude desktop, and paste these values in the install prompt.'
 		});
 
 		// Stable "latest" endpoint — always resolves to the most recent release
@@ -1798,7 +1798,7 @@ class MCPSettingTab extends PluginSettingTab {
 		const info = this.plugin.getMCPServerInfo();
 		
 		// Update connection status grid
-		const connectionEl = activeDocument.querySelector('.mcp-status-grid');
+		const connectionEl = document.querySelector('.mcp-status-grid');
 		if (connectionEl) {
 			const connectionItems = connectionEl.querySelectorAll('div');
 			for (let i = 0; i < connectionItems.length; i++) {
@@ -1821,7 +1821,7 @@ class MCPSettingTab extends PluginSettingTab {
 		// Update Claude Code connection section with proper auth handling.
 		// Rebuild via the shared renderer so the live view matches the initial
 		// render exactly (including the JSON-config + warning auth path).
-		const protocolSection = activeDocument.querySelector('.protocol-command-example');
+		const protocolSection = document.querySelector('.protocol-command-example');
 		if (protocolSection instanceof HTMLElement && info) {
 			// Get correct protocol and port based on HTTPS setting
 			const protocol = this.plugin.settings.httpsEnabled ? 'https' : 'http';
@@ -1832,7 +1832,7 @@ class MCPSettingTab extends PluginSettingTab {
 		}
 		
 		// Update any other dynamic content areas that need live updates
-		const statusElements = activeDocument.querySelectorAll('[data-live-update]');
+		const statusElements = document.querySelectorAll('[data-live-update]');
 		for (let i = 0; i < statusElements.length; i++) {
 			const el = statusElements[i];
 			const updateType = el.getAttribute('data-live-update');

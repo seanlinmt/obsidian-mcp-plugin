@@ -86,5 +86,8 @@ export default tseslint.config(
 		"versions.json",
 		".claude/**",
 		"src/config/**/*.json",
+		"data.json",
+		"tsconfig.headless.json",
+		"headless/**",
 	]),
 );
